@@ -40,11 +40,11 @@ func main() {
 	//strconv 可以把数字转成字符串，也可以把字符串转换成数字
 	fmt.Println("------------------------数字与字符串相互转换")
 	str4 := "15"
-	//num, err := strconv.Atoi(str4)
-	//if err != nil {
-	//	panic(err) // panic()立刻终止当前函数执行，返回panic的错误信息，直到程序崩溃
-	//}
-	//fmt.Printf("字符串转成int：num = %d\n", num)
+	num, err := strconv.Atoi(str4)
+	if err != nil {
+		panic(err) // panic()立刻终止当前函数执行，返回panic的错误信息，直到程序崩溃
+	}
+	fmt.Printf("字符串转成int：num = %d\n", num)
 	//
 	//str5 := strconv.Itoa(num)
 	//fmt.Printf("int转成字符串：str5 = %s\n", str5)
