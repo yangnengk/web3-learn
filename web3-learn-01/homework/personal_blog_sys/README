@@ -1,7 +1,0 @@
-# 需要按的依赖
-go get -u gorm.io/gorm
-go get -u gorm.io/driver/mysql
-go get -u github.com/golang-jwt/jwt/v5
-
-# go 的banb
-go 1.24.4
