@@ -1,4 +1,4 @@
-package data
+package data_model
 
 import (
 	"gorm.io/gorm"
@@ -6,22 +6,32 @@ import (
 
 type User struct {
 	gorm.Model
-	Username string `uri:"username"`
-	Password string `uri:"password"`
-	Email    string `uri:"email"`
+	Username string `form:"username" binding:"required"`
+	Password string `form:"password" binding:"required"`
+	Email    string `form:"email"`
+}
+
+type UserInfo struct {
+	gorm.Model
+	Username string `form:"username" binding:"required"`
+	Email    string `form:"email"`
 }
 
 type Post struct {
 	gorm.Model
-	Author  User
-	Title   string
-	Content string
+	Title   string `form:"title" json:"title" binding:"required"`
+	Content string `form:"content" json:"content" binding:"required"`
 	UserID  uint
 }
 
 type Comment struct {
 	gorm.Model
-	Content string
-	PostID  uint
+	Content string `form:"content" json:"content" binding:"required"`
+	PostID  uint   `form:"postId" json:"postId" binding:"required"`
 	UserID  uint
+}
+
+// TableName 设置表名
+func (UserInfo) TableName() string {
+	return "users"
 }
