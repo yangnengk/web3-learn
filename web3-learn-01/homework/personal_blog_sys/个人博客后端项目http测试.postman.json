@@ -441,7 +441,7 @@
                                     "value": "0"
                                 }
                             ],
-                            "body": ""
+                            "body": "{\"status\":  \"success\",\"message\": \"添加文章成功\"}"
                         }
                     ],
                     "protocolProfileBehavior": {
