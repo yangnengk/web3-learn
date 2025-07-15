@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/learn/personal_blog_sys/log_opt"
 	"io"
 	"net/http"
 	"os"
@@ -16,6 +17,9 @@ import (
 func main() {
 	// gin.DisableConsoleColor()
 
+	log_opt.InitLogger("./log", 10000000)
+
+	log_opt.GetLogger().Info("gin start")
 	// f, _ := os.Create("gin.log")
 	fileName := "blog-sys-gin-" + time.Now().Format("2006-01-02") + ".log"
 	f, _ := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
