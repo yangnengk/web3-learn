@@ -3,8 +3,8 @@ go get -u gorm.io/gorm
 go get -u gorm.io/driver/mysql
 go get -u github.com/golang-jwt/jwt/v5
 # 日志
-go get gopkg.in/natefinch/lumberjack.v2
-go get github.com/sirupsen/logrus
+go get -u gopkg.in/natefinch/lumberjack.v2
+go get -u github.com/sirupsen/logrus
 
 # go 运行的环境
 go 1.24.

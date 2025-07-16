@@ -1,6 +1,7 @@
 package log_opt
 
 import (
+	"net"
 	"os"
 	"path/filepath"
 	"sync"
@@ -12,11 +13,18 @@ import (
 
 var logger *logrus.Logger
 
+type AppConfig struct {
+	Name      string
+	Version   string
+	LogDir    string
+	MaxSizeMB int
+}
+
 func GetLogger() *logrus.Logger {
 	return logger
 }
 
-func InitLogger(logPath string, maxSize int) *logrus.Logger {
+func InitLogger(config *AppConfig) *logrus.Logger {
 	logger = logrus.New()
 	// 设置日志为json格式
 	logger.SetFormatter(&logrus.JSONFormatter{
@@ -26,21 +34,68 @@ func InitLogger(logPath string, maxSize int) *logrus.Logger {
 	// 同时输出到文件和控制台
 	logger.SetOutput(logrus.StandardLogger().Out)
 
+	// 添加全局字段
+	hostname, _ := os.Hostname()
+
+	logger.AddHook(newGlobalFieldsHook(map[string]interface{}{
+		"app":     config.Name,
+		"version": config.Version,
+		"host":    hostname,
+		"ip":      getLocalIP(),
+		"env":     os.Getenv("APP_ENV"),
+	}))
+
 	// 创建日期和大小轮转的hook
-	logger.AddHook(newDateSizeRotateHook(logPath, maxSize))
+	logger.AddHook(newLevelDateSizeRotateHook(config.LogDir, config.MaxSizeMB))
 
 	return logger
 }
 
-func newDateSizeRotateHook(logPath string, maxSize int) logrus.Hook {
-	return &dateSizeRotateHook{
-		logDir:    logPath,
+// 获取ip地址
+func getLocalIP() string {
+	addres, err := net.InterfaceAddrs()
+	if err != nil {
+		return "unkown"
+	}
+	for _, address := range addres {
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return "unkown"
+}
+
+// 全局字段hook
+type globalFieldsHook struct {
+	fields map[string]interface{}
+}
+
+func (h *globalFieldsHook) Fire(entry *logrus.Entry) error {
+	for k, v := range h.fields {
+		entry.Data[k] = v
+	}
+	return nil
+}
+
+func (h *globalFieldsHook) Levels() []logrus.Level {
+	return logrus.AllLevels
+}
+
+func newGlobalFieldsHook(fields map[string]interface{}) *globalFieldsHook {
+	return &globalFieldsHook{fields: fields}
+}
+
+func newLevelDateSizeRotateHook(logDir string, maxSize int) logrus.Hook {
+	return &levelDateSizeRotateHook{
+		logDir:    logDir,
 		maxSize:   maxSize,
 		writerMap: make(map[logrus.Level]*lumberjack.Logger),
 	}
 }
 
-func (d *dateSizeRotateHook) Fire(entry *logrus.Entry) error {
+func (d *levelDateSizeRotateHook) Fire(entry *logrus.Entry) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
@@ -82,7 +137,7 @@ func (d *dateSizeRotateHook) Fire(entry *logrus.Entry) error {
 	return err
 }
 
-func (d *dateSizeRotateHook) Levels() []logrus.Level {
+func (d *levelDateSizeRotateHook) Levels() []logrus.Level {
 	// 可以在这里控制哪些级别需要分离
 	return []logrus.Level{
 		logrus.PanicLevel,
@@ -95,7 +150,7 @@ func (d *dateSizeRotateHook) Levels() []logrus.Level {
 	}
 }
 
-type dateSizeRotateHook struct {
+type levelDateSizeRotateHook struct {
 	logDir     string
 	maxSize    int
 	writerMap  map[logrus.Level]*lumberjack.Logger
