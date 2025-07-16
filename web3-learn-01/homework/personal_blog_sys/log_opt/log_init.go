@@ -146,7 +146,7 @@ func (d *levelDateSizeRotateHook) Levels() []logrus.Level {
 		logrus.WarnLevel,
 		logrus.InfoLevel,
 		// 可以注释掉不需要的级别
-		// logrus.DebugLevel,
+		logrus.DebugLevel,
 	}
 }
 

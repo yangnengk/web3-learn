@@ -144,7 +144,7 @@ func (w *GinLogrusWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-// ------------------gin hook---------------------
+// GinLoggerMiddleware ------------------gin hook---------------------
 // GinLoggerMiddleware Gin 访问日志中间件
 func GinLoggerMiddleware(logger *logrus.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
